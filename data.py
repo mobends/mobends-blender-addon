@@ -1,11 +1,11 @@
 # <pep8 compliant>
 
 import bpy
+from .statics import FORMAT_VERSION
 
 
 def create_bone_data(scene_bone):
     return {
-        'name': scene_bone.name,
         'keyframes': []
     }
 # end create_bone_data
@@ -13,7 +13,6 @@ def create_bone_data(scene_bone):
 
 def create_armature_data(scene_armature):
     armature = {
-        'name': scene_armature.name,
         'bones': {}
     }
 
@@ -78,7 +77,7 @@ def create_data(context, EXPORT_SEL_ONLY=False):
     for obj in scene_objs:
         if obj.type == 'ARMATURE':
             armature = create_armature_data(obj)
-            armatures[armature['name']] = armature
+            armatures[obj.name] = armature
     
     orig_frame = scene.frame_current
 
@@ -94,6 +93,7 @@ def create_data(context, EXPORT_SEL_ONLY=False):
     scene.frame_set(orig_frame, subframe=0.0)
 
     return {
+        'version': FORMAT_VERSION,
         'meta': bpy.app.version_string,
         'armatures': armatures
     }

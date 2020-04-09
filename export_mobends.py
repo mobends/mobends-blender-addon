@@ -21,6 +21,6 @@ def save(context,
 
     # Exporting the data as JSON
     with open(filepath, 'w', encoding='utf8', newline='\n') as f:
-        f.write(json.dumps(data, sort_keys=True, indent=4))
+        f.write(json.dumps(data, indent=4))
 
     return { 'FINISHED' }
