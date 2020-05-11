@@ -17,7 +17,8 @@ def create_armature_data(scene_armature):
     }
 
     for scene_bone in scene_armature.pose.bones:
-        armature['bones'][scene_bone.name] = create_bone_data(scene_bone)
+        if not scene_bone.name.startswith('helper:'):
+            armature['bones'][scene_bone.name] = create_bone_data(scene_bone)
     
     return armature
 # end create_armature_data
@@ -64,11 +65,12 @@ def fetch_animation_data(armatures, scene_armature):
     armature = armatures[scene_armature.name]
 
     for frame_bone in scene_armature.pose.bones:
-        fetch_bone_data(frame_bone, armature['bones'][frame_bone.name])
+        if frame_bone.name in armature['bones']:
+            fetch_bone_data(frame_bone, armature['bones'][frame_bone.name])
 # end fetch_animation_data
 
 
-def create_data(context, EXPORT_SEL_ONLY=False):
+def create_data(context, EXPORT_SEL_ONLY=False, EXPORT_SINGLE_ARMATURE=False):
     scene = context.scene
     scene_objs = context.selected_objects if EXPORT_SEL_ONLY else scene.objects
     scene_frames = range(scene.frame_start, scene.frame_end + 1)  # Up to and including the end frame.
@@ -92,9 +94,21 @@ def create_data(context, EXPORT_SEL_ONLY=False):
 
     scene.frame_set(orig_frame, subframe=0.0)
 
-    return {
-        'version': FORMAT_VERSION,
-        'meta': bpy.app.version_string,
-        'armatures': armatures
-    }
+    if EXPORT_SINGLE_ARMATURE:
+        armature = None
+        for a in armatures:
+            armature = armatures[a]
+
+        return {
+            'version': FORMAT_VERSION,
+            'meta': bpy.app.version_string,
+            'bones': armature['bones']
+        }
+    else:
+        return {
+            'version': FORMAT_VERSION,
+            'meta': bpy.app.version_string,
+            'armatures': armatures
+        }
+
 # end create_data

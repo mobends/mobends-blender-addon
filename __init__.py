@@ -7,7 +7,7 @@ bl_info = {
     "blender": (2, 81, 0),
     "location": "File > Import-Export",
     "description":
-        "Exports all animations in JSON",
+        "Exports all animations in a binary format.",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
@@ -38,7 +38,7 @@ class ExportMoBends(bpy.types.Operator, ExportHelper):
     bl_label = "Export Mo' Bends"
     bl_options = {'PRESET'}
 
-    filename_ext = ".json"
+    filename_ext = ".bendsanim"
 
     use_selection = BoolProperty(
         name="Selection Only",
@@ -46,14 +46,20 @@ class ExportMoBends(bpy.types.Operator, ExportHelper):
         default=False,
         )
 
+    export_single_armature = BoolProperty(
+        name="Single Armature",
+        description="Exports just one armature, so the format doesn't contain an armatures array.",
+        default=True,
+        )
+
     def execute(self, context):
-        return export_mobends.save(context, self.filepath, self.use_selection)
+        return export_mobends.save(context, self.filepath, self.use_selection, self.export_single_armature)
     #end execute
 #end ExportMoBends
 
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportMoBends.bl_idname, text="Mo' Bends (.json)")
+    self.layout.operator(ExportMoBends.bl_idname, text="Mo' Bends (.bendsanim)")
 
 
 def register():

@@ -1,3 +1,3 @@
 # <pep8 compliant>
 
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
