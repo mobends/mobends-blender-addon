@@ -68,8 +68,11 @@ def encode_armature(bones):
 def encode_data(data, single_armature=False):
     """ Encodes object data into base64 """
 
+    HEADER = b'BENDSANIM'
+
     if single_armature:
-        encoded = struct.pack('>I', data['version'])
+        encoded = HEADER
+        encoded += struct.pack('>I', data['version'])
         encoded += encode_armature(data['bones'])
         return encoded
 

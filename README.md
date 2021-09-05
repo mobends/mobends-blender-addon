@@ -14,7 +14,7 @@ In Blender, open up `Preferences`, and in the addons tab use the `Install...` ac
 There should be plenty of tutorials on how to install Blender addons out there, I'm sure you'll figure it out <3.
 
 # Format
-All values are encoded in big endian.
+All values are encoded in **big endian**.
 ```ebnf
 (* basic building blocks *)
 digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;

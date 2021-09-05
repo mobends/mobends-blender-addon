@@ -3,7 +3,7 @@
 bl_info = {
     "name": "Mo' Bends Exporter",
     "author": "Iwo Plaza",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (2, 81, 0),
     "location": "File > Import-Export",
     "description":
