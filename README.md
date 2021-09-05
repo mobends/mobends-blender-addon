@@ -43,8 +43,12 @@ scale = float * 3 ;
 frame = property flags, [ position ], [ rotation ], [ scale ] ;
 bone = string, { frame } ;
 
+(* header *)
+header = BENDSANIM
+
 (* structure of the whole file *)
-file = version,
+file = header,
+       version,
        amount of bones,
        amount of frames,
        { bone } ;
