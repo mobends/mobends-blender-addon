@@ -5,6 +5,13 @@
 
 This script is an addon for Blender. It exports animation data in a custom binary format. The exported files can then be used for making custom BendsPacks for the Minecraft Mo' Bends mod, or for any other animation related project.
 
+# Development
+To run unit tests, use [pytest](https://docs.pytest.org/en/latest/):
+```sh
+# In the project root directory
+$ pytest
+```
+
 # Installation
 
 To install this addon into Blender, just download the latest release .zip package, which should be

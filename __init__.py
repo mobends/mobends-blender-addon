@@ -16,19 +16,12 @@ bl_info = {
 
 import bpy
 from bpy.props import (
-    BoolProperty,
-    FloatProperty,
-    StringProperty,
-    EnumProperty
-    )
+    BoolProperty
+)
 from bpy_extras.io_utils import (
-    ImportHelper,
     ExportHelper
     )
-import math
-import mathutils
-from . import export_mobends
-from mathutils import Matrix
+from .export_mobends import save_scene
 
 
 class ExportMoBends(bpy.types.Operator, ExportHelper):
@@ -46,16 +39,11 @@ class ExportMoBends(bpy.types.Operator, ExportHelper):
         default=False,
         )
 
-    export_single_armature = BoolProperty(
-        name="Single Armature",
-        description="Exports just one armature, so the format doesn't contain an armatures array.",
-        default=True,
-        )
-
     def execute(self, context):
-        return export_mobends.save(context, self.filepath, self.use_selection, self.export_single_armature)
-    #end execute
-#end ExportMoBends
+        return save_scene(context, self.filepath, self.use_selection)
+    # end execute
+
+# end ExportMoBends
 
 
 def menu_func_export(self, context):

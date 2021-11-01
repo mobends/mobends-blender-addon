@@ -1,10 +1,14 @@
+# <pep8 compliant>
+
 import struct
-import base64
+from .data import BoneData, AnimationData, Keyframe
+
 
 def encode_float(value):
     return struct.pack('>f', value)
 
-def encode_keyframe(keyframe):
+
+def encode_keyframe(keyframe: Keyframe) -> bytes:
     hasPosition = keyframe['position'] != [0, 0, 0]
     hasRotation = keyframe['rotation'] != [0, 0, 0, 1]
     hasScale = keyframe['scale'] != [1, 1, 1]
@@ -38,42 +42,39 @@ def encode_keyframe(keyframe):
     return value
 
 
-def encode_bone(bone_key, bone):
+def encode_bone(bone_key: str, bone: BoneData) -> bytes:
     value = bone_key.encode() + b'\0'
-    for frame in bone['keyframes']:
+    for frame in bone.keyframes:
         value += encode_keyframe(frame)
 
     return value
 
 
-def encode_armature(bones):
+def encode_animation(animation: AnimationData) -> bytes:
     amount_of_keyframes = 0
-    for bone_key in bones:
-        bone = bones[bone_key]
-        if len(bone['keyframes']) > amount_of_keyframes:
-            amount_of_keyframes = len(bone['keyframes'])
+    for bone_key in animation.bones:
+        bone = animation.bones[bone_key]
+        if len(bone.keyframes) > amount_of_keyframes:
+            amount_of_keyframes = len(bone.keyframes)
 
     # Encoding the amount of keyframes
     value = struct.pack('>I', amount_of_keyframes)
     # Encoding the amount of bones
-    value += struct.pack('>I', len(bones))
+    value += struct.pack('>I', len(animation.bones))
 
-    for bone_key in bones:
-        bone = bones[bone_key]
+    for bone_key in animation.bones:
+        bone = animation.bones[bone_key]
         value += encode_bone(bone_key, bone)
 
     return value
 
 
-def encode_data(data, single_armature=False):
+def encode_data(data) -> bytes:
     """ Encodes object data into base64 """
 
     HEADER = b'BENDSANIM'
 
-    if single_armature:
-        encoded = HEADER
-        encoded += struct.pack('>I', data['version'])
-        encoded += encode_armature(data['bones'])
-        return encoded
-
-    return b''
+    encoded = HEADER
+    encoded += struct.pack('>I', data['version'])
+    encoded += encode_animation(data['animation'])
+    return encoded
