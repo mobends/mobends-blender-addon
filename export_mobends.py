@@ -6,7 +6,7 @@ from .data_creator import create_data
 from .data_encoder import encode_data
 
 
-def save_scene(context,
+def save_scene(context: bpy.types.Context,
                filepath_base,
                export_selection_only=True,
                ):
@@ -14,8 +14,7 @@ def save_scene(context,
     directory_path = os.path.dirname(filepath_base)
 
     # Exit edit mode before exporting, so current object states are exported properly.
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
 
     # Fetching data from the context
     data_list = create_data(context, export_selection_only)

@@ -1,12 +1,12 @@
 # <pep8 compliant>
 from typing import List
+from .BoneData import BoneData
 
 
 class ArmatureData:
-    def __init__(self, bones: List[str]):
+    def __init__(self, bones: List[BoneData]):
         super().__init__()
-        self.bones_names = bones
-
+        self.bones = bones
     # end __init__
 
     @classmethod
@@ -18,8 +18,6 @@ class ArmatureData:
             )
         )
 
-        return cls(bone_names)
-
+        return cls(list(map(lambda name: BoneData(name), bone_names)))
     # end create_from_scene_armature
-
 # end ArmatureData

@@ -10,19 +10,15 @@ class AnimationData:
         self.bones = bones
         self.target = target
         self.action = action
-
     # end __init__
 
     @classmethod
     def from_armature(cls, armature_data: ArmatureData, target: str = 'character', action: str = 'default_action'):
         bones = {}
 
-        for bone_name in armature_data.bones_names:
-            if not bone_name.startswith('helper:'):
-                bones[bone_name] = BoneData()
+        for bone in armature_data.bones:
+            bones[bone.name] = bone.clone()
 
         return cls(bones, target, action)
-
     # end from_armature
-
 # end ArmatureData

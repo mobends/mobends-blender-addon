@@ -12,7 +12,6 @@ class ContextController(RevertibleActionStack):
     def __init__(self, context) -> None:
         super(ContextController, self).__init__()
         self.context = context
-
     # end __init__
 
     def object_set_animation_data_action(self, ob, value) -> None:
@@ -25,5 +24,4 @@ class ContextController(RevertibleActionStack):
         self._push_revert_action(revert)
 
         ob.animation_data.action = value
-
     # end object_set_animation_data_action

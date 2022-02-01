@@ -1,7 +1,9 @@
 # <pep8 compliant>
 
-from typing import Any, List
 import bpy
+import mathutils
+import math
+from typing import List
 from .statics import FORMAT_VERSION
 from .data import BoneData
 from .data.ContextController import ContextController
@@ -9,7 +11,11 @@ from .data import ArmatureData
 from .data import AnimationData
 
 
-def get_bone_local_rest_matrix(scene_bone):
+def get_bone_local_rest_matrix(scene_bone: bpy.types.PoseBone) -> mathutils.Matrix:
+    """
+    Retrieves a bone's rest transformation relative to it's parent.
+    """
+
     if scene_bone.parent is None:
         return scene_bone.bone.matrix_local.copy()
 
@@ -18,7 +24,11 @@ def get_bone_local_rest_matrix(scene_bone):
 # end get_bone_local_rest_matrix
 
 
-def get_bone_local_matrix(scene_bone):
+def get_bone_local_matrix(scene_bone: bpy.types.PoseBone):
+    """
+    Retrieves a bone's posed transformation relative to it's parent.
+    """
+
     if scene_bone.parent is None:
         return scene_bone.matrix.copy()
 
@@ -27,14 +37,41 @@ def get_bone_local_matrix(scene_bone):
 # end get_bone_local_matrix
 
 
-def fetch_bone_data(scene_bone, bone: BoneData):
+def get_bone_pose_matrix(scene_bone: bpy.types.PoseBone) -> mathutils.Matrix:
     # Bone matrix relative to parent, with constraints
     local_mat = get_bone_local_matrix(scene_bone)
     # Bone rest matrix relative to parent
     local_rest_mat = get_bone_local_rest_matrix(scene_bone)
     local_rest_mat.invert()
     # Final matrix in pose space
-    pose_mat = local_rest_mat @ local_mat
+    return local_rest_mat @ local_mat
+# end get_bone_pose_matrix
+
+
+def get_bone_rot_matrix(scene_bone: bpy.types.PoseBone):
+    """
+    Retrieves a bone's rest rotation transformation.
+    """
+
+    mat = scene_bone.bone.matrix_local.to_3x3()
+    mat.resize_4x4()
+
+    additional_rotation = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
+    additional_rotation2 = mathutils.Matrix.Rotation(math.radians(180), 4, 'Y')
+
+    # mathutils.Matrix.Scale(-1, 4, mathutils.Vector((1, 0, 0))) @
+    return mat @ additional_rotation @ additional_rotation2 @ mathutils.Matrix.Scale(-1, 4, mathutils.Vector((0, 0, 1)))
+# end get_bone_local_matrix
+
+
+def fetch_bone_data(scene_bone: bpy.types.PoseBone, bone: BoneData) -> None:
+    # The post matrix is relative to the rest transform.
+    pose_mat = get_bone_pose_matrix(scene_bone)
+
+    # We need to get an offset and rotation inline with the global axes.
+
+    rot_mat = get_bone_rot_matrix(scene_bone)
+    pose_mat = rot_mat @ pose_mat @ rot_mat.inverted()
 
     (pos, quat, scale) = pose_mat.decompose()
 
@@ -46,27 +83,27 @@ def fetch_bone_data(scene_bone, bone: BoneData):
 # end fetch_bone_data
 
 
-def fetch_pose(animation: AnimationData, bl_armature):
+def fetch_pose(animation: AnimationData, bl_armature: bpy.types.Object) -> None:
     for frame_bone in bl_armature.pose.bones:
         if frame_bone.name in animation.bones:
             fetch_bone_data(frame_bone, animation.bones[frame_bone.name])
 # end fetch_pose
 
 
-def create_data(context, EXPORT_SEL_ONLY=False):
+def create_data(context: bpy.types.Context, EXPORT_SEL_ONLY=False):
     scene = context.scene
     scene_objects = context.selected_objects if EXPORT_SEL_ONLY else scene.objects
     context_ctrl = ContextController(context)
 
     # bpy.data.objects['Armature'].animation_data.nla_tracks['NlaTrack'].strips.items()
 
-    armatures: dict[str, tuple[Any, ArmatureData]] = {}
+    armatures: dict[str, tuple[bpy.types.Armature, ArmatureData]] = {}
     for obj in filter(lambda o: o.type == 'ARMATURE' and o.animation_data is not None, scene_objects):
         armatures[obj.name] = (obj, ArmatureData.parse_scene_armature(obj))
 
     animations: List[AnimationData] = []
 
-    def fetch_animation(bl_armature, armature: ArmatureData, start_frame: int, end_frame: int,
+    def fetch_animation(bl_armature: bpy.types.Object, armature: ArmatureData, start_frame: int, end_frame: int,
                         action: str) -> AnimationData:
         nonlocal scene
 
@@ -79,7 +116,6 @@ def create_data(context, EXPORT_SEL_ONLY=False):
             fetch_pose(animation, bl_armature)
 
         return animation
-
     # end fetch_animation
 
     original_frame = scene.frame_current
@@ -118,5 +154,4 @@ def create_data(context, EXPORT_SEL_ONLY=False):
         'meta': bpy.app.version_string,
         'animation': animation,
     } for animation in animations]
-
 # end create_data
